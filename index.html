@@ -5,13 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>测试</title>
+    <style>
+        #btn {
+            margin: 0 auto;
+            display: block;
+            width: 270px;
+            height: 40px;
+            border-width: 0px;
+            border-radius: 3px;
+            background: #1E90FF;
+            cursor: pointer;
+            outline: none;
+            font-family: Microsoft YaHei;
+            color: white;
+            font-size: 17px;
+        }
+        #btn:hover {
+            background: #5599FF;
+        }
+    </style>
 </head>
 <body>
-    <div>我的作品！</div>
-    <button onclick="alert123()">测试</button>
+    <!-- <div id="app1"> -->
+        <button id="btn" onclick="alert123()">点我</button>
+    <!-- </div> -->
     <script>
         function alert123 () {
-            alert('你好')
+            while (true) {
+                alert('爱你呦~小仙女')
+            }
         }
     </script>
 </body>
