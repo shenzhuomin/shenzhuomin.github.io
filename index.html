@@ -51,7 +51,8 @@
         <!-- 饼图 -->
         <!-- <div id="container" style="height: 550px; width: 600px"></div> -->
         <div>
-            <h2>高校审核情况</h2>
+            <!-- <h2>高校审核情况</h2> -->
+            <h2>队伍提交情况</h2>
             <div id="table2"></div>
         </div>
         <!-- <div>
@@ -161,8 +162,11 @@
                 num = arr[16][0].slice(start+1);
                 var pass_rate = num;
 
-                // var all = "截至"+month+"月"+day+"日15时：共"+school_num+"所高校，"+team_num+"个队伍报名，当日新增"+new_school+"个高校，"+new_team+"个队伍。";
-                var all = "截至"+month+"月"+day+"日15时：共"+team_num+"个队伍报名，审核通过"+pass_num+"个队伍，审核通过率为"+pass_rate+"。";
+                // var all = "截至"+month+"月"+day+"日17时：共"+school_num+"所高校，"+team_num+"个队伍报名，当日新增"+new_school+"个高校，"+new_team+"个队伍。";
+                // var all = "截至"+month+"月"+day+"日16时：共"+team_num+"个队伍报名，审核通过"+pass_num+"个队伍，审核通过率为"+pass_rate+"。";
+                // document.getElementById("summary").innerHTML = all;
+
+                var all = "截至"+month+"月"+day+"日17时：共"+team_num+"个队伍报名，提交"+pass_num+"个作品，提交率为"+pass_rate+"。";
                 document.getElementById("summary").innerHTML = all;
 
                 // 高校覆盖率
