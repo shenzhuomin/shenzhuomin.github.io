@@ -1,311 +1,198 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>中国研究生人工智能创新大赛参赛统计</title>
-    <script src="echarts.js"></script>
-    <script src="./lib/jquery.js"></script>
-    <script src="./lib/papaparse.js"></script>
-    <script src="./lib/jschardet.js"></script>
-    <!--[if lte IE 9]>
-        <script src="./lib/base64.js"></script>
-    <![endif]-->
-    
-    <script src="csv2arr.js"></script>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="top">
-        <!-- <div class="select-file">
-            <div class="wrap">选择noin
-                <input type="file" name="csvfile1" />
-            </div>
-        </div> -->
-        <div class="select-file">
-            <div class="wrap">选择school_team
-                <input type="file" name="csvfile2" />
-            </div>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>中国研究生人工智能创新大赛参赛统计</title>
+        <script src="./js/xlsx.full.min.js"></script>
+        <script src="./js/query.js"></script>
+        <link rel="stylesheet" href="./css/style.css">
+    </head>
+    <body>
+        <div id="tips">
+            <input type="file" onchange="importf(this)" />
+            <input type="file" onchange="importf2(this)" />
+            <button onclick="calculate()">生成简报</button>
         </div>
-        <div class="select-file">
-            <div class="wrap">选择total
-                <input type="file" name="csvfile3" />
-            </div>
-        </div>
-        <input type="button" onclick="csv3()" value="生成简报"/>
-    </div>
 
-    <div id="main">
-        <div class="title">
-            <h1>参赛队伍统计简报</h1>
-            <p id="date"></p>
+        <!-- 显示简报 -->
+        <div id="main">
+            <div class="title">
+                <h1>参赛队伍统计简报</h1>
+                <p id="date"></p>
+            </div>
+            <div class="part2">
+                <p id="summary"></p>
+            </div>
+            <div>
+                <h2>队伍提交情况</h2>
+                <div id="table"></div>
+            </div>
         </div>
-        <div class="part2">
-            <p id="summary"></p>
-        </div>
-        <!-- <div>
-            <h2>高校覆盖率</h2>
-            <div id="table1"></div>
-        </div> -->
-        <!-- 饼图 -->
-        <!-- <div id="container" style="height: 550px; width: 600px"></div> -->
-        <div>
-            <!-- <h2>高校审核情况</h2> -->
-            <h2>队伍提交情况</h2>
-            <div id="table2"></div>
-        </div>
-        <!-- <div>
-            <h2>未报名知名院校</h2>
-            <div id="table3"></div>
-        </div> -->
-    </div>
-    
-    
-    <script>
-        // var boshi_num;
-        // var shuoshi_num;
-        // var benke_num;
-        // 未报名
-        // function paintTable3 () {
-        //     $("input[name=csvfile1]").csv2arr(function(arr){
-        //         var flag = true; // 是否第一行
-        //         var table3Str = "<table>";
-        //         $.each( arr, function(i, line){
-        //             if( i === 0 ) {
-        //                 table3Str += "<thead><tr>";
-        //             }else {
-        //                 table3Str += "<tr>";
-        //             }
-        //             $.each( line, function(i, cell){
-        //                 if( flag === true) {
-        //                     table3Str += "<th>"+cell+"</th>";
-        //                 }else {
-        //                     table3Str += "<td>"+cell+"</td>";
-        //                 }
-        //             });
-        //             flag = false;
-        //             if( i === 0) {
-        //                 table3Str +="</tr></thead>"
-        //             }else {
-        //                 table3Str += "</tr>";
-        //             }
-        //         });
-        //         $("#table3").html( table3Str );
-        //     });
-        // }
-        function paintTable2 () {
-            $("input[name=csvfile2]").csv2arr(function(arr){
-                var flag = true; // 是否第一行
-                var table2Str = "<table>";
-                $.each( arr, function(i, line){
-                    if( i === 0 ) {
-                        table2Str += "<thead><tr>";
-                    }else {
-                        table2Str += "<tr>";
+
+        <script>
+            var excelData = null //Excel数据
+            var submitData = null //提交完成的数据
+            /*
+            FileReader共有4种读取方法：
+            1.readAsArrayBuffer(file)：将文件读取为ArrayBuffer。
+            2.readAsBinaryString(file)：将文件读取为二进制字符串
+            3.readAsDataURL(file)：将文件读取为Data URL
+            4.readAsText(file, [encoding])：将文件读取为文本，encoding缺省值为'UTF-8'
+                         */
+            var wb;//读取完成的数据
+            var rABS = false; //是否将文件读取为二进制字符串
+
+            function importf(obj) {//导入
+                if(!obj.files) {
+                    return;
+                }
+                var f = obj.files[0];
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var data = e.target.result;
+                    if(rABS) {
+                        wb = XLSX.read(btoa(fixdata(data)), {//手动转化
+                            type: 'base64'
+                        });
+                    } else {
+                        wb = XLSX.read(data, {
+                            type: 'binary'
+                        });
                     }
-                    $.each( line, function(i, cell){
-                        if( flag === true) {
-                            table2Str += "<th>"+cell+"</th>";
-                        }else {
-                            table2Str += "<td>"+cell+"</td>";
+                    //wb.SheetNames[0]是获取Sheets中第一个Sheet的名字
+                    //wb.Sheets[Sheet名]获取第一个Sheet的数据
+                    // document.getElementById("demo").innerHTML= JSON.stringify(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]));
+
+                    excelData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]])
+                };
+                if(rABS) {
+                    reader.readAsArrayBuffer(f);
+                } else {
+                    reader.readAsBinaryString(f);
+                }
+            }
+
+            function importf2(obj) {//导入
+                if(!obj.files) {
+                    return;
+                }
+                var f = obj.files[0];
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var data = e.target.result;
+                    if(rABS) {
+                        wb = XLSX.read(btoa(fixdata(data)), {//手动转化
+                            type: 'base64'
+                        });
+                    } else {
+                        wb = XLSX.read(data, {
+                            type: 'binary'
+                        });
+                    }
+                    //wb.SheetNames[0]是获取Sheets中第一个Sheet的名字
+                    //wb.Sheets[Sheet名]获取第一个Sheet的数据
+                    // document.getElementById("demo").innerHTML= JSON.stringify(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]));
+
+                    submitData = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]])
+                };
+                if(rABS) {
+                    reader.readAsArrayBuffer(f);
+                } else {
+                    reader.readAsBinaryString(f);
+                }
+            }
+
+            function fixdata(data) { //文件流转BinaryString
+                var o = "",
+                    l = 0,
+                    w = 10240;
+                for(; l < data.byteLength / w; ++l) o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w, l * w + w)));
+                o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w)));
+                return o;
+            }
+
+            function calculate() {
+                if (excelData === null || submitData === null) {
+                    alert("请选择文件！")
+                    return
+                }
+                var exportData = []
+                // 计算1的数据
+                var query = new Query(excelData)
+                var teamTotal = query.group('队伍名称').count() //队伍总数
+
+                query.reset()
+                var schoolTotal = query.where('用户类型','=','队长').group('学校名称').count()
+
+                query.reset()
+                var data = query.where('用户类型','=','队长').group('学校名称').find()
+                for (let item of data) {
+                    // console.log(item)
+                    var temp = {}
+                    temp.name = item._id
+                    temp.total = item.count
+                    temp.submit = 0
+                    exportData.push(temp)
+                }
+
+                // 计算2的数据
+                var query = new Query(submitData)
+                var submitTotal = query.group('队伍名称').count() //提交总数
+
+                query.reset()
+                var data = query.where('用户类型','=','队长').group('学校名称').find()
+                // console.log(data)
+                for (let item of data) {
+                    let name = item._id
+                    for(let item2 of exportData) {
+                        if(name===item2.name) {
+                            item2.submit = item.count
+                            break
                         }
-                    });
-                    flag = false;
-                    if( i === 0) {
-                        table2Str +="</tr></thead>"
-                    }else {
-                        table2Str += "</tr>";
                     }
-                });
-                $("#table2").html( table2Str );
-                // paintTable3();
-            });
-        }
-        function csv3(){
-            $("input[name=csvfile3]").csv2arr(function(arr){
-                var start;
-                var num;
-                // 获得日期
-                var today = new Date();
-                var year = today.getFullYear();
-                var month = today.getMonth()+1;
-                var day = today.getDate();
-                today = year + '/' + month + '/' + day;
-                document.getElementById("date").innerHTML = today;
+                }
 
-                // 更改标题
+                // 添加提交率
+                for (let item of exportData) {
+                    item.submitRate = Math.round((item.submit/item.total)*100)
+                }
+
+                // 排序
+                query = new Query(exportData)
+                exportData = query.sort('submitRate','asc').sort('total','desc').find()
+
+                // 添加%
+                for (let item of exportData) {
+                    item.submitRate += '%'
+                }
+
+                // 显示时间
+                var today = new Date()
+                var year = today.getFullYear()
+                var month = today.getMonth()+1
+                var day = today.getDate()
+                var hour = today.getHours()
+                today = year + '/' + month + '/' + day
+                document.getElementById("date").innerHTML = today
+
+                // 显示summary
+                var summary = "截至"+month+"月"+day+"日"+hour+"时：共"+teamTotal+"个队伍报名，提交"+submitTotal+"个作品，提交率为"+Math.round((submitTotal/teamTotal)*100)+"%。"
+                document.getElementById("summary").innerHTML = summary
+                
+                // 显示表格
+                var tableString = '<table><thead><tr><th>学校</th><th>参赛队伍总数</th><th>提交作品数</th><th>提交率</th></tr></thead><tbody>'
+                for (let item of exportData) {
+                    tableString += '<tr><td>'+item.name+'</td><td>'+item.total+'</td><td>'+item.submit+'</td><td>'+item.submitRate+'</td></tr>'
+                }
+                tableString += '</tbody></table>'
+                document.getElementById("table").innerHTML = tableString
+
+                document.getElementById("main").style.display = "block"
+                document.getElementById("tips").style.display = "none"
                 document.title = "中国研究生人工智能创新大赛参赛统计" + month + day;
-                // 摘要
-                // 学校总数
-                // start = arr[0][0].indexOf("：");
-                // num = arr[0][0].slice(start+1);
-                // var school_num = num;
-                // 队伍总数
-                start = arr[15][0].indexOf("：");
-                num = arr[15][0].slice(start+1);
-                var team_num = num;
-                // 新增学校
-                // start = arr[1][0].indexOf("：");
-                // num = arr[1][0].slice(start+1);
-                // var new_school = num;
-                // 新增队伍
-                // start = arr[3][0].indexOf("：");
-                // num = arr[3][0].slice(start+1);
-                // var new_team = num;
-                // 审核通过数
-                start = arr[14][0].indexOf("：");
-                num = arr[14][0].slice(start+1);
-                var pass_num = num;
-                // 审核通过率
-                start = arr[16][0].indexOf("：");
-                num = arr[16][0].slice(start+1);
-                var pass_rate = num;
-
-                // var all = "截至"+month+"月"+day+"日17时：共"+school_num+"所高校，"+team_num+"个队伍报名，当日新增"+new_school+"个高校，"+new_team+"个队伍。";
-                // var all = "截至"+month+"月"+day+"日16时：共"+team_num+"个队伍报名，审核通过"+pass_num+"个队伍，审核通过率为"+pass_rate+"。";
-                // document.getElementById("summary").innerHTML = all;
-
-                var all = "截至"+month+"月"+day+"日17时：共"+team_num+"个队伍报名，提交"+pass_num+"个作品，提交率为"+pass_rate+"。";
-                document.getElementById("summary").innerHTML = all;
-
-                // 高校覆盖率
-                // C9覆盖率
-                // var C9_rate;
-                // start = arr[11][0].indexOf("：");
-                // C9_rate = arr[11][0].slice(start+1);
-                // C9_rate = parseFloat(C9_rate);
-                // C9_rate = (C9_rate*100).toFixed(2) + '%';
-                // 双一流覆盖率
-                // var syl_rate;
-                // start = arr[10][0].indexOf("：");
-                // syl_rate = arr[10][0].slice(start+1);
-                // syl_rate = parseFloat(syl_rate);
-                // syl_rate = (syl_rate*100).toFixed(2) + '%';
-                // 985覆盖率
-                // var _985_rate;
-                // start = arr[8][0].indexOf("：");
-                // _985_rate = arr[8][0].slice(start+1);
-                // _985_rate = parseFloat(_985_rate);
-                // _985_rate = (_985_rate*100).toFixed(2) + '%';
-                // 211覆盖率
-                // var _211_rate;
-                // start = arr[9][0].indexOf("：");
-                // _211_rate = arr[9][0].slice(start+1);
-                // _211_rate = parseFloat(_211_rate);
-                // _211_rate = (_211_rate*100).toFixed(2) + '%';
-
-                // var table1Str = '<table>'+
-                // '<thead><tr><th>高校</th><th>覆盖率</th><tr/></thead>'+
-                // '<tr><td>“C9”</td><td>'+C9_rate+'</td></tr>'+
-                // '<tr><td>“双一流”</td><td>'+syl_rate+'</td></tr>'+
-                // '<tr><td>“985”</td><td>'+_985_rate+'</td></tr>'+
-                // '<tr><td>“211”</td><td>'+_211_rate+'</td></tr>'+
-                // '</table>';
-                // document.getElementById("table1").innerHTML = table1Str;
-                // // 博士数量
-                // start = arr[15][0].indexOf("：");
-                // num = arr[15][0].slice(start+1);
-                // boshi_num = num;
-                // // 硕士数量
-                // start = arr[14][0].indexOf("：");
-                // num = arr[14][0].slice(start+1);
-                // shuoshi_num = num;
-                // // 本科数量
-                // start = arr[13][0].indexOf("：");
-                // num = arr[13][0].slice(start+1);
-                // benke_num = num;
-
-                //something to do here
-                // var tblStr = "<table border='1'>";
-                // $.each( arr, function(i, line){
-                //     tblStr += "<tr>";
-                //     $.each( line, function(i, cell){
-                //         tblStr += "<td>"+cell+"</td>";
-                //     });
-                //     tblStr += "</tr>";
-                // });
-                // $("#resTbl").html( tblStr );
-
-                // 画图
-                // paintBing();
-                //画表
-                paintTable2();
-            });
-            // paintTable3();
-            var selectDom1 = document.getElementById("top");
-            selectDom1.style.display = "none";
-            var main = document.getElementById("main");
-            main.style.display = "block";
-        }
-        // function paintBing () {
-        //     var dom = document.getElementById("container");
-        //     var myChart = echarts.init(dom);
-        //     var app = {};
-        //     option = null;
-
-
-        //     option = {
-        //         title: {
-        //             text: '参赛队伍学历分布',
-        //             // subtext: '虚构数据',
-        //             left: 'center',
-        //             textStyle: {
-        //                 fontSize: 24,
-        //                 color: '#000'
-        //             },
-        //             top: 20
-        //         },
-        //         tooltip : {
-        //             trigger: 'item',
-        //             formatter: "{a} <br/>{b} : {c} ({d}%)"
-        //         },
-        //         legend: {
-        //             // orient: 'vertical',
-        //             // top: 'middle',
-        //             bottom: 20,
-        //             left: 'center',
-        //             data: ['博士','硕士','本科（已获研究生入学资格）'],
-        //             textStyle: {
-        //                 fontSize: 18
-        //             }
-        //         },
-        //         // color:["#2ec7c9","#b6a2de","#5ab1ef","#ffb980","#d87a80","#8d98b3","#e5cf0d","#97b552","#95706d","#dc69aa","#07a2a4","#9a7fd1","#588dd5","#f5994e","#c05050","#59678c","#c9ab00","#7eb00a","#6f5553","#c14089"],
-        //         color: ['#afe39b','#60acfc','#feb64d','#fa816d'],
-        //         series : [
-        //             {
-        //                 type: 'pie',
-        //                 radius : '65%',
-        //                 center: ['50%', '50%'],
-        //                 selectedMode: 'single',
-        //                 data:[
-        //                     {value:boshi_num, name: '博士'},
-        //                     {value:shuoshi_num, name: '硕士'},
-        //                     {value:benke_num, name: '本科（已获研究生入学资格）'}
-        //                 ],
-        //                 itemStyle: {
-        //                     emphasis: {
-        //                         shadowBlur: 10,
-        //                         shadowOffsetX: 0,
-        //                         shadowColor: 'rgba(0, 0, 0, 0.5)'
-        //                     },
-        //                     normal: {
-        //                         label:{
-        //                             show: true,
-        //                             // formatter: '{d}%',
-        //                             formatter:function(data){ return data.percent.toFixed(2)+"%";},
-        //                             fontSize: 18
-        //                         },
-        //                         labelLine :{show:true} 
-        //                     }
-        //                 }
-        //             }
-        //         ]
-        //     };
-        //     if (option && typeof option === "object") {
-        //         myChart.setOption(option, true);
-        //     }
-        // } 
-    </script>
-</body>
-</html>
+            }
+        </script>
+    </body>
+</html> 
