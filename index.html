@@ -178,11 +178,11 @@
                 document.getElementById("date").innerHTML = today
 
                 // 显示summary
-                var summary = "截至"+month+"月"+day+"日"+hour+"时：共"+teamTotal+"个队伍报名，提交"+submitTotal+"个作品，提交率为"+Math.round((submitTotal/teamTotal)*100)+"%。"
+                var summary = "截至"+month+"月"+day+"日"+hour+"时：共"+teamTotal+"个队伍审核通过，提交"+submitTotal+"个作品，提交率为"+Math.round((submitTotal/teamTotal)*100)+"%。"
                 document.getElementById("summary").innerHTML = summary
                 
                 // 显示表格
-                var tableString = '<table><thead><tr><th>学校</th><th>参赛队伍总数</th><th>提交作品数</th><th>提交率</th></tr></thead><tbody>'
+                var tableString = '<table><thead><tr><th>学校</th><th>审核通过队伍数</th><th>提交作品数</th><th>提交率</th></tr></thead><tbody>'
                 for (let item of exportData) {
                     tableString += '<tr><td>'+item.name+'</td><td>'+item.total+'</td><td>'+item.submit+'</td><td>'+item.submitRate+'</td></tr>'
                 }
