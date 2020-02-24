@@ -22,7 +22,7 @@
             rawFile.send(null);  
         }
 
-        readTextFile("https://shenzhuomin.github.io/ExpressionTest/Untitled.json", function(text){  
+        readTextFile("https://shenzhuomin.github.io/ExpressionTest/self.json", function(text){  
             var data = JSON.parse(text);
             console.log(data.RECORDS);
             // console.log(JSON.parse(data.RECORDS[57].test_result))
@@ -43,7 +43,8 @@
             // }
 
             for (let item of newData) {
-                let expTest = JSON.parse(item.test_result).result.expression
+                // let expTest = JSON.parse(item.test_result).result.expression
+                let expTest = JSON.parse(item.test_result)
                 // console.log(expTest)
                 tableString += '<tr><td>'+item.name+'</td><td>'+expTest.HaCorrectCount+'</td><td>'+expTest.DiCorrectCount+'</td><td>'+expTest.AnCorrectCount+'</td><td>'+expTest.SuCorrectCount+'</td><td>'+expTest.SaCorrectCount+'</td><td>'+expTest.FeCorrectCount+'</td></tr>'
             }
