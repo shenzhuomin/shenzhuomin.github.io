@@ -22,7 +22,7 @@
             rawFile.send(null);  
         }
 
-        readTextFile("https://shenzhuomin.github.io/ExpressionTest/self.json", function(text){  
+        readTextFile("https://shenzhuomin.github.io/ExpressionTest/erbao.json", function(text){  
             var data = JSON.parse(text);
             console.log(data.RECORDS);
             // console.log(JSON.parse(data.RECORDS[57].test_result))
@@ -34,7 +34,8 @@
             let newData = data.RECORDS
             // newData = newData.concat(data.RECORDS[57])
             
-            let tableString = '<table><thead><tr><th>姓名</th><th>高兴</th><th>厌恶</th><th>愤怒</th><th>惊讶</th><th>悲伤</th><th>恐惧</th></tr></thead><tbody>'
+            // let tableString = '<table><thead><tr><th>姓名</th><th>高兴</th><th>厌恶</th><th>愤怒</th><th>惊讶</th><th>悲伤</th><th>恐惧</th></tr></thead><tbody>'
+            let tableString2 = '<table><thead><tr><th>姓名</th><th>手机</th></tr></thead><tbody>'
 
             // for (let item of oldData) {
             //     let expTest = JSON.parse(item.test_result).test_app.result.expression
@@ -44,12 +45,12 @@
 
             for (let item of newData) {
                 // let expTest = JSON.parse(item.test_result).result.expression
-                let expTest = JSON.parse(item.test_result)
+                // let expTest = JSON.parse(item.test_result)
                 // console.log(expTest)
-                tableString += '<tr><td>'+item.name+'</td><td>'+expTest.HaCorrectCount+'</td><td>'+expTest.DiCorrectCount+'</td><td>'+expTest.AnCorrectCount+'</td><td>'+expTest.SuCorrectCount+'</td><td>'+expTest.SaCorrectCount+'</td><td>'+expTest.FeCorrectCount+'</td></tr>'
+                tableString2 += '<tr><td>'+item.name+'</td><td>'+item.phone+'</td></tr>'
             }
-            tableString += '</tbody></table>'
-            document.getElementById("table").innerHTML = tableString
+            tableString2 += '</tbody></table>'
+            document.getElementById("table").innerHTML = tableString2
         })
     </script>
 </body>
